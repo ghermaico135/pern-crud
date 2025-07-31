@@ -4,6 +4,7 @@ import bodyparse from 'body-parser'
 import dotenv from "dotenv"
 import employeeRoute from "./routes/employee.js"
 
+
 const app = express()
 
 const PORT = 5000;
@@ -17,7 +18,11 @@ app.use(bodyparse.json())
 
 app.use('/api/employee', employeeRoute)
 
-
+app.use((err,req,res,next) =>{
+    const statusCode = err.statusCode || 500
+    const message = err.message || "Internal server error"
+    return res.status(statusCode).json({error:message});
+})
 
 app.listen(PORT ,()=>{
     console.log(`Server listens at port ${PORT}`)

@@ -1,9 +1,9 @@
 import express from 'express';
-import { getEmployee,createEmployee,specificEmployee,updateEmployee,deleteEmployee } from '../controller/employeeController.js';
+import { getAllEmployee,createEmployee,specificEmployee,updateEmployee,deleteEmployee } from '../controller/employeeController.js';
 
 const route = express.Router();
 
-route.get("/", getEmployee);
+route.get("/", getAllEmployee);
 
 route.post("/", createEmployee);
 
