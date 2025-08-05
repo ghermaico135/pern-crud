@@ -1,5 +1,11 @@
 import { query } from "../utils/connectToDB.js";
-import { createEmployeeTableQuery,createRoleQuery,getAllEmployeeQuery,createEmployeeQuery,getAllEmployee, getEmployeeQuery } from "../model/sqlQuery.js";
+import { createEmployeeTableQuery,createRoleQuery,
+    getAllEmployeeQuery,
+    createEmployeeQuery, 
+    getEmployeeQuery,
+    deleteEmployeeQuery,
+   updateEmployeeQuery
+ } from "../model/sqlQuery.js";
 import { createErrors } from "../utils/error.js";
 
 export const getAllEmployee = async (req, res, next) => {  
@@ -39,12 +45,13 @@ export const createEmployee = async (req, res, next) => {
     }
 
 }
-export const specificEmployee = async  (req, res, next) => { 
+export const specificEmployee = async (req, res, next) => { 
    try{
         let id = req.params.id
-        const data = await query(getEmployeeQuery(id))
+        const data = await query(getEmployeeQuery, [id])
+        console.log(data)
         if(!data.rows.length){
-            next(createErrors(400,"employee isn't found"))
+           return next(createErrors(400,"employee isn't found"))
         }
         return res.status(200).json(data.rows[0]);
 
@@ -52,13 +59,46 @@ export const specificEmployee = async  (req, res, next) => {
          console.log(error.message)
         next(createErrors(400 ,"couldn't found employee_details table"));
    }
-    next();
+
 }
+
+export const deleteEmployee =async (req, res, next) => {  
+  
+   try{
+        const id = req.params.id;
+         const data = await query(deleteEmployeeQuery, [id]);
+    console.log(data)
+            if(!data.rowCount){
+                return next(createErrors(400, "No data found"))
+            }
+            return res.status(200).json({message:"successfully deleted"})
+
+   }catch(error){
+         console.log(error.message)
+        next(createErrors(400 ,"couldn't found employee_details table"));
+   }
+  
+}
+
 export const updateEmployee = async  (req, res, next) => { 
-    res.send("update specific employee");
-    next();
-}
-export const deleteEmployee = (req, res, next) => {  
-    res.send("delete specific employee");
-    next();
+    
+    try{
+        const id = req.params.id
+        console.log(id)
+        const {name,email,age,role,salary} = req.body
+        console.log(name)
+          if(!name || !email || !age || !role || !salary){
+            return res.status(400).json({error:"Missing fields"})
+        }
+
+        const result = await query(updateEmployeeQuery,[name,email,age,role,salary,id])
+            console.log(result)
+        if(result.rowCount ===  0){
+             return next(createErrors(400, "No data found"))
+        }
+        return res.status(200).json(result.rows[0])
+    }catch(error){
+         console.log(error.message)
+        next(createErrors(400 ,"couldn't found employee_details table"));
+    }
 }
