@@ -1,5 +1,5 @@
 import { query } from "../utils/connectToDB.js";
-import { createEmployeeTableQuery,createRoleQuery,getAllEmployeeQuery } from "../model/sqlQuery.js";
+import { createEmployeeTableQuery,createRoleQuery,getAllEmployeeQuery,createEmployeeQuery,getAllEmployee, getEmployeeQuery } from "../model/sqlQuery.js";
 import { createErrors } from "../utils/error.js";
 
 export const getAllEmployee = async (req, res, next) => {  
@@ -22,11 +22,36 @@ export const getAllEmployee = async (req, res, next) => {
 }
 
 export const createEmployee = async (req, res, next) => {  
-    res.send("create employee");
-    next();
+    try{
+
+        const {name,email,age,role,salary} = req.body
+       
+        if(!name || !email || !age || !role || !salary){
+            return res.status(400).json({error:"Missing fields"})
+        }
+
+        const data = await query(createEmployeeQuery,[name,email,age,role,salary]);
+        return res.status(201).json(data.rows[0]);
+
+    }catch(error){
+           console.log(error.message)
+        next(createErrors(400 ,"couldn't found employee_details table"));
+    }
+
 }
 export const specificEmployee = async  (req, res, next) => { 
-    res.send("get specific employee");
+   try{
+        let id = req.params.id
+        const data = await query(getEmployeeQuery(id))
+        if(!data.rows.length){
+            next(createErrors(400,"employee isn't found"))
+        }
+        return res.status(200).json(data.rows[0]);
+
+   }catch(error){
+         console.log(error.message)
+        next(createErrors(400 ,"couldn't found employee_details table"));
+   }
     next();
 }
 export const updateEmployee = async  (req, res, next) => { 
