@@ -7,7 +7,7 @@ import employeeRoute from "./routes/employee.js"
 
 const app = express()
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 const corsOption = {
     origin:'*'
@@ -17,6 +17,10 @@ app.use(cors(corsOption))
 app.use(bodyparse.json())
 
 app.use('/api/employee', employeeRoute)
+
+app.use((req,res)=>{
+    res.status(404).json({error: "Not Found!"})
+})
 
 app.use((err,req,res,next) =>{
     const statusCode = err.statusCode || 500
